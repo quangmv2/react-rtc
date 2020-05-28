@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createRef } from 'react';
+import React, { useState, useEffect, createRef, useRef } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import Peer from "peerjs";
@@ -17,11 +17,20 @@ function App() {
   const [idPeer, setIdPeer] = useState(null);
   const [audio, setAudio] = useState(false);
   const [idCall, setIdCall] = useState(null);
-  const video = createRef(null);
+  const video = useRef();
 
   useEffect(() => {
     peer.on('open', id => {
       setIdPeer(id);
+    });
+    peer.on('call', call => {
+      console.log(1);
+      call.answer();
+      call.on('stream', rmStream => {
+        console.log(video);
+        
+        video.current.srcObject = rmStream;
+      })
     })
   }, []);
 
@@ -32,9 +41,10 @@ function App() {
   const callPeer = (id, stream) => {
     const call = peer.call(id, stream);
     call.on('stream', rmStream => {
-      video.current.srcObject = rmStream;
+      // video.srcObject = rmStream;
     })
   }
+
 
   const clickCall = () => {
     getMedia({
